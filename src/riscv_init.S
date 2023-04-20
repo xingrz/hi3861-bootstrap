@@ -259,5 +259,5 @@ pmp_init:
     ecall        /* ecall: M-mode -> U-mode */
 
 /* jump to C func. */
-    tail main
+    tail app_main
 #endif

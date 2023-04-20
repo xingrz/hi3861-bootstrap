@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 
+find_program(PYTHON python3)
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 
 set(CMAKE_SYSTEM_NAME Generic)
@@ -52,13 +54,35 @@ target_link_options(app PRIVATE -T${CMAKE_CURRENT_SOURCE_DIR}/link.ld)
 
 add_custom_command(
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/app.bin
-    COMMAND ${CMAKE_OBJCOPY} -O binary
+    COMMAND ${CMAKE_OBJCOPY}
+            -O binary
+            -R .rom.text -R .rom.code.text
+            -R .rom.data -R .rom.code.data
+            -R .rom.bss  -R .rom.code.bss
+            -S
             ${CMAKE_CURRENT_BINARY_DIR}/app.elf
             ${CMAKE_CURRENT_BINARY_DIR}/app.bin
     DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/app.elf
 )
 
+add_custom_command(
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/app_signed.bin
+    COMMAND ${PYTHON} ${CMAKE_SOURCE_DIR}/tools/sign_tool.py
+            ${CMAKE_CURRENT_BINARY_DIR}/app.bin
+            ${CMAKE_CURRENT_BINARY_DIR}/app_signed.bin
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/app.bin
+)
+
+add_custom_command(
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/app_allinone.bin
+    COMMAND ${PYTHON} ${CMAKE_SOURCE_DIR}/tools/packet_bin.py
+            ${CMAKE_SOURCE_DIR}/tools/loader.bin
+            ${CMAKE_CURRENT_BINARY_DIR}/app_signed.bin
+            ${CMAKE_CURRENT_BINARY_DIR}/app_allinone.bin
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/app_signed.bin
+)
+
 add_custom_target(
     build ALL
-    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/app.bin
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/app_allinone.bin
 )

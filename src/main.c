@@ -3,8 +3,8 @@
 HI_EXTERN hi_u32 __heap_begin__;
 HI_EXTERN hi_u32 __heap_end__;
 
-int
-main(void)
+hi_void
+app_main(hi_void)
 {
 	hi_watchdog_disable();
 
@@ -34,5 +34,8 @@ main(void)
 
 	boot_msg0("Hello world!");
 
-	return 0;
+	for (int i = 0;; i++) {
+		boot_msg1("i = ", i);
+		mdelay(1000);
+	}
 }
