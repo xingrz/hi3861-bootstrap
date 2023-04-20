@@ -25,6 +25,7 @@ app_main(hi_void)
 
 	for (int i = 0;; i++) {
 		boot_msg1("i = ", i);
+		hi_io_set_pull(HI_IO_NAME_GPIO_9, i % 2 + 1);
 		mdelay(1000);
 	}
 }
